@@ -1,0 +1,45 @@
+Program         → statements
+
+statements      → statement statements | ε
+
+statement       → assignment
+                | declaration
+                | if_statement
+                | while_statement
+                | repeat_statement
+                | print_statement
+                | factorial
+                | block
+
+declaration     → typedef identifier ';'
+
+assignment      → identifier '=' expression ';'
+
+if_statement    → 'if' '(' expression ')' block ('else' block)?
+
+while_statement → 'while' '(' expression ')' block
+
+repeat_statement → 'repeat' block 'until' '(' expression ')'
+
+print_statement → 'print' '(' string ')' ';'
+
+factorial       → 
+
+block           → '{' statements '}'
+
+expression      → expression operator term
+                | expression comparison term
+                | term
+
+term            → identifier
+                | number
+
+operator	    → '+' | '-' | '*' | '/'
+
+comparison      → '==' | '!=' | '<=' | '>=' | '<' | '>' | '&&' | '||'
+ 
+identifier      → [a-zA-Z_][a-zA-Z0-9_]*
+
+number          → [0-9]+
+
+typedef         → 'int' | 'float' | 'char' | 'string'

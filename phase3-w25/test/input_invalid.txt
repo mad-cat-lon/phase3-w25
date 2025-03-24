@@ -1,0 +1,120 @@
+1. Invalid Character
+
+Input: x @ y;
+Expected Output: Lexical Error at line 1: Invalid character '@'
+
+Explanation: The lexer should throw an error for the invalid character @, which is not a valid token.
+
+
+2. Invalid Number Format
+
+Input: 123abc;
+Expected Output: Lexical Error at line 1: Invalid number format
+
+Explanation: The lexer should detect that a number cannot be followed by alphabetic characters, throwing an error.
+
+
+3. Consecutive Operators
+
+Input: 5++10;
+Expected Output: Lexical Error at line 1: Consecutive operators not allowed
+
+Explanation: The lexer should detect the ++ as consecutive operators, which is not allowed.
+
+
+4. Unknown Escape Sequence in String
+
+Input: "Hello\xWorld";
+Expected Output: Lexical Error at line 1: Unknown escape sequence
+
+Explanation: The lexer should throw an error when encountering an unknown escape sequence like \x inside a string literal.
+
+
+5. Unterminated String Literal
+
+Input: "Hello test
+Expected Output: Lexical Error at line 1: Unterminated string
+
+Explanation: The lexer should detect that the string literal is not properly terminated with a closing ", and raise an error.
+
+
+6. Missing Semicolon
+
+Input: int x = 10
+Expected Output: Parse Error at line 1: Missing semicolon
+
+Explanation: The parser should identify that the statement is missing a semicolon at the end, raising a parse error.
+
+
+7. Unexpected Token in Expression
+
+Input: 5 + ( 10 *;
+Expected Output: Parse Error at line 1: Unexpected token ';'
+
+Explanation: The parser should detect the unexpected ; token, which should not be part of an expression at this point.
+
+
+8. Missing Parentheses in Function Call
+
+Input: print 10;
+Expected Output: Parse Error at line 1: Missing parentheses in function call
+
+Explanation: The parser should detect that function calls must include parentheses, and an error should be raised when they are missing.
+
+
+9. Unrecognized Keyword
+
+Input: loop x = 10;
+Expected Output: Lexical Error at line 1: Invalid keyword 'loop'
+
+Explanation: The lexer should recognize that loop is not a valid keyword and throw an error.
+
+
+10. Unexpected End of Input in Expression
+
+Input: x = 5 + ;
+Expected Output: Parse Error at line 1: Unexpected end of input in expression
+
+Explanation: The parser should raise an error when it encounters an incomplete expression, such as missing a number or operand after the +.
+
+
+11. Invalid Function Declaration
+
+Input: int 123abc() { }
+Expected Output: Lexical Error at line 1: Invalid function name '123abc'
+
+Explanation: The lexer should throw an error because function names cannot start with a number.
+
+
+12. Missing Closing Brace in Block
+
+Input: { int x = 10;
+Expected Output: Parse Error at line 1: Missing closing brace '}' for block
+
+Explanation: The parser should detect that the block is missing a closing }.
+
+
+13. Invalid Comparison Operator
+
+Input: x >=< 5;
+Expected Output: Lexical Error at line 1: Invalid comparison operator
+
+Explanation: The lexer should throw an error because >=< is not a valid comparison operator.
+
+
+14. Unexpected Token after Statement
+
+Input: int x = 5; print x;
+Expected Output: Parse Error at line 1: Unexpected token 'print'
+
+Explanation: The parser should detect that print cannot directly follow a statement like int x = 5; unless it's part of an expression or block.
+
+
+15. Extra Semicolon in Block
+
+Input: { int x = 5;;}
+Expected Output: Parse Error at line 1: Extra semicolon in block
+
+Explanation: The parser should detect that an extra semicolon is not allowed in a block where the first one is already terminating a statement.
+
+

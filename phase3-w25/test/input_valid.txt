@@ -1,0 +1,140 @@
+1. Valid Integer and Operator Parsing
+
+Input: 10 + 5
+Expected Output:
+
+Token: NUMBER | Lexeme: '10' | Line: 1
+Token: OPERATOR | Lexeme: '+' | Line: 1
+Token: NUMBER | Lexeme: '5' | Line: 1
+
+Explanation: This tests the lexers ability to recognize valid numbers and operators (+).
+
+
+2. Variable Declaration
+
+Input: int x;
+Expected Output:
+
+Token: INT | Lexeme: 'int' | Line: 1
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+
+Explanation: This tests the lexers ability to handle type keywords (int), identifiers (x), and delimiters (;).
+
+
+3. Valid Variable Assignment
+
+Input: x = 10;
+Expected Output:
+
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: EQUALS | Lexeme: '=' | Line: 1
+Token: NUMBER | Lexeme: '10' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+
+Explanation: This tests the lexers ability to recognize variable assignments, including an identifier (x), operator (=), number (10), and the delimiter (;).
+
+
+4. Keyword Recognition
+
+Input: if repeat until
+Expected Output:
+
+Token: IF | Lexeme: 'if' | Line: 1
+Token: REPEAT | Lexeme: 'repeat' | Line: 1
+Token: UNTIL | Lexeme: 'until' | Line: 1
+
+Explanation: This tests if the lexer can correctly identify keywords such as if, repeat, and until.
+
+
+5. Print Statement
+
+Input: print "Hello, World!";
+Expected Output:
+
+Token: PRINT | Lexeme: 'print' | Line: 1
+Token: STRING_LITERAL | Lexeme: 'Hello, World!' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+
+Explanation: This tests the lexers ability to recognize the print keyword, string literals, and semicolons.
+
+
+6. Valid Comparison Operators
+
+Input: x == 5
+Expected Output:
+
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: OPERATOR | Lexeme: '==' | Line: 1
+Token: NUMBER | Lexeme: '5' | Line: 1
+
+Explanation: This tests the lexer’s ability to recognize comparison operators like ==.
+
+
+7. Valid Parentheses and Block
+
+Input: { int y = 2; }
+Expected Output:
+
+Token: LBRACE | Lexeme: '{' | Line: 1
+Token: INT | Lexeme: 'int' | Line: 1
+Token: IDENTIFIER | Lexeme: 'y' | Line: 1
+Token: EQUALS | Lexeme: '=' | Line: 1
+Token: NUMBER | Lexeme: '2' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+Token: RBRACE | Lexeme: '}' | Line: 1
+
+Explanation: This tests the lexer’s handling of braces ({}) to define a block, as well as variable declaration and assignment.
+
+
+8. While Loop Syntax
+
+Input: while x < 10 { x = x + 1; }
+Expected Output:
+
+Token: WHILE | Lexeme: 'while' | Line: 1
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: COMPARISON | Lexeme: '<' | Line: 1
+Token: NUMBER | Lexeme: '10' | Line: 1
+Token: LBRACE | Lexeme: '{' | Line: 1
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: EQUALS | Lexeme: '=' | Line: 1
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: OPERATOR | Lexeme: '+' | Line: 1
+Token: NUMBER | Lexeme: '1' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+Token: RBRACE | Lexeme: '}' | Line: 1
+
+Explanation: This test case checks for a while loop structure with an identifier, comparison operator (<), and assignment operation inside the block.
+
+
+9. Factorial Operator
+
+Input: x = 5!;
+Expected Output:
+
+Token: IDENTIFIER | Lexeme: 'x' | Line: 1
+Token: EQUALS | Lexeme: '=' | Line: 1
+Token: NUMBER | Lexeme: '5' | Line: 1
+Token: FACTORIAL | Lexeme: '!' | Line: 1
+Token: SEMICOLON | Lexeme: ';' | Line: 1
+
+Explanation: This test case evaluates the handling of the factorial operator (!), which should be identified as TOKEN_FACTORIAL.
+
+
+10. Valid Function Declaration
+
+Input: void print_message() { print "Hello";}
+Expected Output:
+
+Token: VOID | Lexeme: 'void' | Line: 1
+Token: IDENTIFIER | Lexeme: 'print_message' | Line: 1
+Token: LPAREN | Lexeme: '(' | Line: 1
+Token: RPAREN | Lexeme: ')' | Line: 1
+Token: LBRACE | Lexeme: '{' | Line: 1
+Token: PRINT | Lexeme: 'print' | Line: 1
+Token: STRING_LITERAL | Lexeme: 'Hello' | Line: 1
+Token: RBRACE | Lexeme: '}' | Line: 1
+
+Explanation: This tests the lexer’s handling of function declarations with the void keyword, identifiers, parentheses, and a print statement inside a block.
+
