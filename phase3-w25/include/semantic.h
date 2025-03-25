@@ -27,6 +27,8 @@ SymbolTable* init_symbol_table();
 // Inserts a new variable with given name, type, and line number into the current scope
 void add_symbol(SymbolTable* table, const char* name, int type, int line);
 
+void remove_symbol(SymbolTable* table, const char* name);
+
 // Look up a symbol in the table
 // Searches for a variable by name across all accessible scopes
 // Returns the symbol if found, NULL otherwise
@@ -49,8 +51,15 @@ void remove_symbols_in_current_scope(SymbolTable* table);
 // Releases all allocated memory when the symbol table is no longer needed
 void free_symbol_table(SymbolTable* table);
 
+int is_initialized(SymbolTable* table, const char* name);
+
+void initialize_symbol(SymbolTable* table, const char* name);   
+
+
+
 // Main semantic analysis function
 int analyze_semantics(ASTNode* ast);
+int check_statement(ASTNode* ast, SymbolTable* table);
 int check_declaration(ASTNode* node, SymbolTable* table);
 int check_assignment(ASTNode* node, SymbolTable* table);
 int check_expression(ASTNode* node, SymbolTable* table);

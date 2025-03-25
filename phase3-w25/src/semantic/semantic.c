@@ -32,6 +32,26 @@ void add_symbol(SymbolTable* table, const char* name, int type, int line) {
     }
 }
 
+void remove_symbol(SymbolTable* table, const char* name) {
+    if (!table || !table->head) return;
+
+    Symbol* current = table -> head;
+
+    if(strcmp(current->name, name) == 0) {
+        table -> head = current ->next;
+        free(current);
+    }
+
+    while(current && current->next) {
+        if (strcmp(current->next->name, name) == 0) {
+            Symbol* temp = current->next;
+            current -> next = current->next->next;
+            free(temp);
+        }
+        current = current->next;
+    }
+}
+
 // Look up symbol by name
 Symbol* lookup_symbol(SymbolTable* table, const char* name) {
     Symbol* current = table->head;
@@ -55,6 +75,64 @@ Symbol* lookup_symbol_current_scope(SymbolTable* table, const char* name) {
         current = current->next;
     }
     return NULL;
+}
+
+void enter_scope(SymbolTable* table) {
+    if (!table) return;
+    table->current_scope++;
+}
+
+void exit_scope(SymbolTable* table) {
+    if (!table) return;
+    if (table->current_scope > 0) {
+        table->current_scope--;
+    }
+    else {
+        return;
+    }
+}
+
+void remove_symbols_in_current_scope(SymbolTable* table) {
+    if (!table || !table->head) return;
+    
+    while (table->head && table->head->scope_level == table->current_scope) {
+        Symbol* temp = table->head;
+        table->head = table->head->next;
+        free(temp);
+    }
+    Symbol* current = table->head;
+    while (current && current->next) {
+        if (current->next->scope_level == table->current_scope) {
+            Symbol* temp = current->next;
+            current->next = current->next->next;
+            free(temp);
+        }
+        current = current->next;
+    }
+}
+
+void initialize_symbol(SymbolTable* table, const char* name) {
+    Symbol* current = lookup_symbol(table, name);
+    if (current) {
+        current-> is_initialized = 1;
+    }
+}
+
+int is_initialized(SymbolTable* table, const char* name) {
+    Symbol* current = lookup_symbol(table, name);
+    return current->is_initialized;
+}
+
+void free_symbol_table(SymbolTable* table) {
+    if (!table) return;
+
+    Symbol* current = table->head;
+    while(current) {
+        Symbol* temp = current;
+        current = current->next;
+        free(temp);
+    }
+    free(table);
 }
 
 // Analyze AST semantically
@@ -84,6 +162,12 @@ int check_program(ASTNode* node, SymbolTable* table) {
     }
     
     return result;
+}
+
+int check_statement(ASTNode* node, SymbolTable* table) {
+    if (node->type == AST_VARDECL) {
+
+    }
 }
 
 // Check declaration node
@@ -131,6 +215,19 @@ int check_assignment(ASTNode* node, SymbolTable* table) {
     
     return expr_valid;
 }
+
+int check_block(ASTNode* node, SymbolTable* table){
+
+}
+
+int check_condition(ASTNode* node, SymbolTable* table) {
+
+}
+
+int check_expression(ASTNode* node, SymbolTable* table){
+
+}
+
 
 void semantic_error(SemanticErrorType error, const char* name, int line) {
     printf("Semantic Error at line %d: ", line);
