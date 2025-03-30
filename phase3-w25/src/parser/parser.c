@@ -596,39 +596,39 @@ void print_token_stream(const char* input) {
     } while (token.type != TOKEN_EOF);
 }
 
-// Main function for testing
-int main() {
-    // Test with both valid and invalid inputs
-    const char *valid_input = "int x;\n" // Valid declaration
-                        "x = 42;\n" // Valid assignment;
-                        "if (1) {\nx = 5;\n}"  // Valid if statement
-                        "while (1) {\nx = 5;\ny = 4;\n}"
-                        "repeat {\nx = 5;\n} until (1);"
-                        "print x;\n"
-                        "y = x + 5;\n"
-                        "if (x == 1) {\nx = 5;\n}"  // Valid if statement
-                        "factorial(4);\n"
-                        "x = (3 + 7) * (10 - 4);";
+// // Main function for testing
+// int main() {
+//     // Test with both valid and invalid inputs
+//     const char *valid_input = "int x;\n" // Valid declaration
+//                         "x = 42;\n" // Valid assignment;
+//                         "if (1) {\nx = 5;\n}"  // Valid if statement
+//                         "while (1) {\nx = 5;\ny = 4;\n}"
+//                         "repeat {\nx = 5;\n} until (1);"
+//                         "print x;\n"
+//                         "y = x + 5;\n"
+//                         "if (x == 1) {\nx = 5;\n}"  // Valid if statement
+//                         "factorial(4);\n"
+//                         "x = (3 + 7) * (10 - 4);";
 
 
-    // const char *input = "factorial(4);";
+//     // const char *input = "factorial(4);";
             
-    // TODO 8: Add more test cases and read from a file:
-    const char *invalid_input = "int x;\n"
-                                "x = 42;\n"
-                                "int ;\n"
-                                "x@ + 4\n;"
-                                "x +- y;\n"
-                                "x = (x + 1;";
+//     // TODO 8: Add more test cases and read from a file:
+//     const char *invalid_input = "int x;\n"
+//                                 "x = 42;\n"
+//                                 "int ;\n"
+//                                 "x@ + 4\n;"
+//                                 "x +- y;\n"
+//                                 "x = (x + 1;";
 
-    printf("Parsing input:\n%s\n", valid_input);
-    print_token_stream(valid_input);
-    parser_init(valid_input);
-    ASTNode *ast = parse();
+//     printf("Parsing input:\n%s\n", valid_input);
+//     print_token_stream(valid_input);
+//     parser_init(valid_input);
+//     ASTNode *ast = parse();
 
-    printf("\nAbstract Syntax Tree:\n");
-    print_ast(ast, 0);
+//     printf("\nAbstract Syntax Tree:\n");
+//     print_ast(ast, 0);
 
-    free_ast(ast);
-    return 0;
-}
+//     free_ast(ast);
+//     return 0;
+// }

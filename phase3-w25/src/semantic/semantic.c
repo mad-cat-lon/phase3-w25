@@ -144,29 +144,59 @@ int analyze_semantics(ASTNode* ast) {
 }
 
 // Check program node
-int check_program(ASTNode* node, SymbolTable* table) {
-    if (!node) return 1;
+// int check_program(ASTNode* node, SymbolTable* table) {
+//     if (!node) return 1;
     
-    int result = 1;
+//     int result = 1;
     
-    if (node->type == AST_PROGRAM) {
-        // Check left child (statement)
-        if (node->left) {
-            result = check_statement(node->left, table) && result;
-        }
+//     if (node->type == AST_PROGRAM) {
+//         // Check left child (statement)
+//         if (node->left) {
+//             result = check_statement(node->left, table) && result;
+//         }
         
-        // Check right child (rest of program)
-        if (node->right) {
-            result = check_program(node->right, table) && result;
-        }
-    }
+//         // Check right child (rest of program)
+//         if (node->right) {
+//             result = check_program(node->right, table) && result;
+//         }
+//     } else {
+//         // fallback, treat node as a singel statement
+//         return check_statement(node, table);
+//     }
     
+//     return result;
+// }
+int check_program(ASTNode* node, SymbolTable* table) {
+    int result = 1;
+
+    while (node) {
+        if (node->type != AST_PROGRAM) {
+            result = check_statement(node, table) && result;
+        }
+        node = node->next;  
+    }
+
     return result;
 }
 
 int check_statement(ASTNode* node, SymbolTable* table) {
-    if (node->type == AST_VARDECL) {
+    if (!node) return 1;
 
+    switch (node->type) {
+        case AST_VARDECL:
+            return check_declaration(node, table);
+        case AST_ASSIGN:
+            return check_assignment(node, table);
+        case AST_BLOCK:
+            return check_block(node, table);
+        case AST_IF:
+        case AST_WHILE:
+            return check_condition(node, table);
+        case AST_PRINT:
+            return check_expression(node->left, table);
+        default:
+            semantic_error(SEM_ERROR_SEMANTIC_ERROR, "Unknown statement", node->token.line);
+            return 0;
     }
 }
 
@@ -178,19 +208,16 @@ int check_declaration(ASTNode* node, SymbolTable* table) {
     
     const char* name = node->token.lexeme;
     
-    // Check if variable already declared in current scope
     Symbol* existing = lookup_symbol_current_scope(table, name);
     if (existing) {
         semantic_error(SEM_ERROR_REDECLARED_VARIABLE, name, node->token.line);
         return 0;
     }
     
-    // Add to symbol table
     add_symbol(table, name, TOKEN_INT, node->token.line);
     return 1;
 }
 
-// Check assignment node
 int check_assignment(ASTNode* node, SymbolTable* table) {
     if (node->type != AST_ASSIGN || !node->left || !node->right) {
         return 0;
@@ -198,17 +225,14 @@ int check_assignment(ASTNode* node, SymbolTable* table) {
     
     const char* name = node->left->token.lexeme;
     
-    // Check if variable exists
     Symbol* symbol = lookup_symbol(table, name);
     if (!symbol) {
         semantic_error(SEM_ERROR_UNDECLARED_VARIABLE, name, node->token.line);
         return 0;
     }
     
-    // Check expression
     int expr_valid = check_expression(node->right, table);
     
-    // Mark as initialized
     if (expr_valid) {
         symbol->is_initialized = 1;
     }
@@ -217,15 +241,71 @@ int check_assignment(ASTNode* node, SymbolTable* table) {
 }
 
 int check_block(ASTNode* node, SymbolTable* table){
+    enter_scope(table);
+    int result = 1;
 
+    ASTNode* stmt = node->next; 
+    while (stmt) {
+        result = check_statement(stmt, table) && result;
+        stmt = stmt->next;
+    }
+
+    exit_scope(table);
+    return result;
 }
 
 int check_condition(ASTNode* node, SymbolTable* table) {
+    if (!check_expression(node->left, table)) return 0; 
 
+    return check_statement(node->right, table);
 }
 
 int check_expression(ASTNode* node, SymbolTable* table){
+    if (!node) return 1;
 
+    switch (node->type) {
+        case AST_NUMBER:
+            return 1;
+
+        case AST_IDENTIFIER: {
+            Symbol* symbol = lookup_symbol(table, node->token.lexeme);
+            if (!symbol) {
+                semantic_error(SEM_ERROR_UNDECLARED_VARIABLE, node->token.lexeme, node->token.line);
+                return 0;
+            }
+            if (!symbol->is_initialized) {
+                semantic_error(SEM_ERROR_UNINITIALIZED_VARIABLE, node->token.lexeme, node->token.line);
+            }
+            return 1;
+        }
+
+        case AST_BINOP: {
+            int left = check_expression(node->left, table);
+            int right = check_expression(node->right, table);
+
+            return left && right;
+        }
+
+
+        case AST_FACTORIAL: {
+            if (strcmp(node->token.lexeme, "factorial") == 0) {
+                // Ensure single integer argument
+                if (node->left) {
+                    int arg_valid = check_expression(node->left, table);
+                    return arg_valid;
+                }
+                semantic_error(SEM_ERROR_INVALID_OPERATION, "factorial", node->token.line);
+                return 0;
+            }
+        }
+
+        case AST_CONDITION:
+ 
+
+        default:
+            semantic_error(SEM_ERROR_INVALID_OPERATION, "expression", node->token.line);
+            return 0;
+    }
 }
 
 
@@ -260,7 +340,8 @@ int main() {
                         "    int y;\n"
                         "    y = x + 10;\n"
                         "    print y;\n"
-                        "}\n";
+                        "}\n"
+                        "z = 10;";
     
     printf("Analyzing input:\n%s\n\n", input);
     
