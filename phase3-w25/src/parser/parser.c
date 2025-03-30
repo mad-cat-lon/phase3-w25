@@ -277,25 +277,43 @@ static ASTNode *parse_factorial(void) {
     return node;
 }
 
-// Parse variable declaration: int x;
 static ASTNode *parse_declaration(void) {
-    ASTNode *node = create_node(AST_VARDECL);
-    advance(); // consume 'int'
 
-    if (!match(TOKEN_IDENTIFIER)) {
+    Token type_token = current_token; // e.g. "int" with type=TOKEN_INT
+
+    // Advance to get the identifier
+    advance();
+    if (current_token.type != TOKEN_IDENTIFIER) {
         parse_error(PARSE_ERROR_MISSING_IDENTIFIER, current_token);
-        exit(1);
+        return NULL;
     }
+    Token ident_token = current_token; // e.g. "x"
 
-    node->token = current_token;
+    // Advance to get the semicolon
     advance();
-
-    if (!match(TOKEN_SEMICOLON)) {
+    if (current_token.type != TOKEN_SEMICOLON) {
+        // Error: missing semicolon
         parse_error(PARSE_ERROR_MISSING_SEMICOLON, current_token);
-        exit(1);
+        return NULL;
     }
+
+    // We successfully saw something like: (int|char) x ;
+    // Advance past the semicolon
     advance();
-    return node;
+
+    ASTNode* decl_node = (ASTNode*)malloc(sizeof(ASTNode));
+    decl_node->type = AST_VARDECL;  // This indicates a "var declaration" node
+
+    // Put the type (int/char) in decl_node->token.type
+    decl_node->token.type = type_token.type; 
+        // e.g., TOKEN_INT if we saw "int", TOKEN_CHAR if we saw "char"
+
+    strcpy(decl_node->token.lexeme, ident_token.lexeme);
+    decl_node->token.line = ident_token.line;
+
+    decl_node->left = decl_node->right = decl_node->next = decl_node->operand = NULL;
+
+    return decl_node;
 }
 
 
