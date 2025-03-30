@@ -171,7 +171,6 @@ static void print_symbol_table(SymbolTable* table) {
 // Forward declarations for expression type-checking
 static int get_expression_type(ASTNode* node, SymbolTable* table);
 
-// We'll define these check_XXX helpers used by check_statement
 static int check_if(ASTNode* node, SymbolTable* table);
 static int check_while(ASTNode* node, SymbolTable* table);
 static int check_repeat(ASTNode* node, SymbolTable* table);
@@ -240,7 +239,6 @@ int check_statement(ASTNode* node, SymbolTable* table) {
 int check_declaration(ASTNode* node, SymbolTable* table) {
     if (node->type != AST_VARDECL) return 0;
 
-    // The parser sets node->token as the identifier token
     const char* name = node->token.lexeme;
 
     // Check if variable is redeclared in the same scope
@@ -250,11 +248,8 @@ int check_declaration(ASTNode* node, SymbolTable* table) {
         return 0;
     }
 
-    // The token type might be TOKEN_INT or TOKEN_CHAR, etc.
-    // If your parser put `int`, `char`, etc. in `node->token.type`:
     int declared_type = node->token.type; // e.g., TOKEN_INT or TOKEN_CHAR
 
-    // Add to symbol table
     add_symbol(table, name, declared_type, node->token.line);
     return 1;
 }
@@ -282,7 +277,6 @@ int check_assignment(ASTNode* node, SymbolTable* table) {
     // Check type compatibility. 
     // Simple logic: if symbol->type == TOKEN_INT but expr_type == TOKEN_CHAR,
     //   we allow it (char -> int). If symbol->type == TOKEN_CHAR but expr_type == TOKEN_INT,
-    //   we flag a mismatch. Adjust to your language rules.
     if (symbol->type == TOKEN_INT && expr_type == TOKEN_CHAR) {
         // Allowed: char -> int
     }
@@ -292,8 +286,6 @@ int check_assignment(ASTNode* node, SymbolTable* table) {
         return 0;
     }
     else if (symbol->type != expr_type) {
-        // If both are the same or are something else?
-        // We only handle int/char. If they differ, mismatch.
         if (!(symbol->type == TOKEN_INT && expr_type == TOKEN_INT) &&
             !(symbol->type == TOKEN_CHAR && expr_type == TOKEN_CHAR))
         {
@@ -434,6 +426,7 @@ static int get_expression_type(ASTNode* node, SymbolTable* table) {
         case AST_COMPARISON: {
             if (node->left) get_expression_type(node->left, table);
             if (node->right) get_expression_type(node->right, table);
+            // comparison returns an int (0, 1) true or false
             return TOKEN_INT;
         }
 
@@ -442,7 +435,6 @@ static int get_expression_type(ASTNode* node, SymbolTable* table) {
             // node->left is the argument
             int arg_type = get_expression_type(node->left, table);
             if (arg_type == -1) return -1; 
-            // If you want to enforce that factorial’s argument must be an int:
             if (arg_type == TOKEN_CHAR) {
                 semantic_error(SEM_ERROR_TYPE_MISMATCH, "factorial()", node->token.line);
                 return -1;
@@ -500,7 +492,12 @@ int main() {
                         "z = 10;\n"
                         "char test;\n"
                         "test = 123;\n"
-                        "x = test + 1;";
+                        "x = test + 1;\n"
+                        "char foo;\n"
+                        "if (foo > 2) {\n"
+                        "   int z;\n"
+                        "   z = 10;\n"
+                        "}\n";
     
     printf("Analyzing input:\n%s\n\n", input);
     
