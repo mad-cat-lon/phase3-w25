@@ -376,7 +376,7 @@ static ASTNode *parse_binop(void) {
 
 // Parse statement
 static ASTNode *parse_statement(void) {
-    printf("Parsing statement w/ lexeme: %s\n", current_token.lexeme);
+    // printf("Parsing statement w/ lexeme: %s\n", current_token.lexeme);
     if (match(TOKEN_INT) || match(TOKEN_FLOAT) || match(TOKEN_CHAR))    return parse_declaration();
     else if (match(TOKEN_IDENTIFIER))   return parse_assignment();
     else if (match(TOKEN_LBRACE))   return parse_block();
@@ -437,6 +437,12 @@ static ASTNode *parse_primary(void) {
     else if (match(TOKEN_IDENTIFIER)) {
         ASTNode *node = create_node(AST_IDENTIFIER);
         advance(); // consume the identifier token
+        return node;
+    }
+    // If it's a string
+    else if (match(TOKEN_STRING_LITERAL)) {
+        ASTNode *node = create_node(AST_STRING);
+        advance();
         return node;
     }
     // If none of the above, it’s an invalid expression
@@ -543,6 +549,7 @@ void print_ast(ASTNode *node, int level) {
         case AST_VARDECL:       printf("VarDecl: %s\n", lexeme); break;
         case AST_ASSIGN:        printf("Assign\n"); break;
         case AST_NUMBER:        printf("Number: %s\n", lexeme); break;
+        case AST_STRING:        printf("String: %s\n", lexeme); break;
         case AST_IDENTIFIER:    printf("Identifier: %s\n", lexeme); break;
         case AST_CONDITION:     printf("Condition\n"); break;
         case AST_IF:            printf("If\n"); break;
@@ -626,10 +633,10 @@ void print_token_stream(const char* input) {
 //                         "y = x + 5;\n"
 //                         "if (x == 1) {\nx = 5;\n}"  // Valid if statement
 //                         "factorial(4);\n"
-//                         "x = (3 + 7) * (10 - 4);";
+//                         "x = (3 + 7) * (10 - 4);\n"
+//                         "x = \"hello\";\n"; // String literal handling
 
-
-//     // const char *input = "factorial(4);";
+//     valid_input = "factorial(4);\n";
             
 //     // TODO 8: Add more test cases and read from a file:
 //     const char *invalid_input = "int x;\n"

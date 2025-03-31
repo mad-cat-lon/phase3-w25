@@ -55,9 +55,13 @@ void remove_symbol(SymbolTable* table, const char* name) {
 }
 
 Symbol* lookup_symbol(SymbolTable* table, const char* name) {
+    // printf("LOOKUP SYMBOL");
     Symbol* current = table->head;
+    // printf("Searching for: %s\n", name);
     while (current) {
+        // printf("Symbol table item name: %s\n", current->name);
         if (strcmp(current->name, name) == 0) {
+            // printf("Found\n");
             return current;
         }
         current = current->next;
@@ -71,6 +75,7 @@ Symbol* lookup_symbol_current_scope(SymbolTable* table, const char* name) {
     while (current) {
         if (strcmp(current->name, name) == 0 &&
             current->scope_level == table->current_scope) {
+            printf("current scope: %d\n", table->current_scope);
             return current;
         }
         current = current->next;
@@ -175,6 +180,7 @@ static int check_if(ASTNode* node, SymbolTable* table);
 static int check_while(ASTNode* node, SymbolTable* table);
 static int check_repeat(ASTNode* node, SymbolTable* table);
 static int check_print(ASTNode* node, SymbolTable* table);
+static int check_factorial(ASTNode* node, SymbolTable* table);
 
 // Check the top-level program (basically a list of statements)
 int check_program(ASTNode* node, SymbolTable* table) {
@@ -228,6 +234,9 @@ int check_statement(ASTNode* node, SymbolTable* table) {
 
         case AST_PRINT:
             return check_print(node, table);
+
+        case AST_FACTORIAL:
+            return check_factorial(node, table);
 
         default:
             semantic_error(SEM_ERROR_SEMANTIC_ERROR,
@@ -304,8 +313,11 @@ static int check_if(ASTNode* node, SymbolTable* table) {
     // node->right = statement or block
     //  e.g. if(...) { ... } 
     int cond_type = get_expression_type(node->left, table);
-    if (cond_type == -1) return 0; // error in the condition
 
+    if(cond_type != TOKEN_INT) {
+        semantic_error(SEM_ERROR_INVALID_CONDITION, "if statement", node->token.line);
+        return 0; // error
+    }
 
     // Now check the body
     return check_statement(node->right, table);
@@ -315,8 +327,11 @@ static int check_while(ASTNode* node, SymbolTable* table) {
     // node->left = expression (the condition)
     // node->right = statement or block
     int cond_type = get_expression_type(node->left, table);
-    if (cond_type == -1) return 0; // error
 
+    if(cond_type != TOKEN_INT) {
+        semantic_error(SEM_ERROR_INVALID_CONDITION, "while statement", node->token.line);
+        return 0; // error
+    }
     // Check body
     return check_statement(node->right, table);
 }
@@ -368,8 +383,19 @@ int check_block(ASTNode* node, SymbolTable* table) {
 static int check_print(ASTNode* node, SymbolTable* table) {
     // For print, node->left should be the expression to print.
     int expr_type = get_expression_type(node->left, table);
-    if (expr_type == -1) {
-        return 0;
+    if(expr_type != TOKEN_INT || expr_type != TOKEN_CHAR) {
+        semantic_error(SEM_ERROR_INVALID_PARAMETERS, "print statement", node->token.line);
+        return 0; // error
+    }
+    return 1;
+}
+
+static int check_factorial(ASTNode* node, SymbolTable* table) {
+    // For print, node->left should be the expression to print.
+    int expr_type = get_expression_type(node->left, table);
+    if(expr_type != TOKEN_INT || expr_type != TOKEN_CHAR) {
+        semantic_error(SEM_ERROR_INVALID_PARAMETERS, "factorial statement", node->token.line);
+        return 0; // error
     }
     return 1;
 }
@@ -392,9 +418,12 @@ static int get_expression_type(ASTNode* node, SymbolTable* table) {
     switch (node->type) {
         case AST_NUMBER:
             return TOKEN_INT;
-
+        case AST_STRING:
+            return TOKEN_CHAR;
         case AST_IDENTIFIER: {
             Symbol* sym = lookup_symbol(table, node->token.lexeme);
+            // printf("get_expression_type lexeme: %s\n", node->token.lexeme);
+            
             if (!sym) {
                 semantic_error(SEM_ERROR_UNDECLARED_VARIABLE,
                                node->token.lexeme, node->token.line);
@@ -414,19 +443,33 @@ static int get_expression_type(ASTNode* node, SymbolTable* table) {
             int right_type = get_expression_type(node->right, table);
             if (left_type == -1 || right_type == -1) return -1; // error
 
-
-            if (left_type == TOKEN_INT || right_type == TOKEN_INT) {
+            if (left_type == TOKEN_INT && right_type == TOKEN_INT) {
                 return TOKEN_INT;  
+            } else if (right_type == TOKEN_CHAR || left_type == TOKEN_CHAR) {
+                if (strcmp(node->token.lexeme, "*") == 0 || strcmp(node->token.lexeme, "/") == 0) {
+                    semantic_error(SEM_ERROR_INVALID_OPERATION, node->token.lexeme, node->token.line);
+                    return -1;
+                }
+                
+                return TOKEN_CHAR;
             }
-            // else if both char, maybe return char. 
-            return TOKEN_CHAR;
+
+            semantic_error(SEM_ERROR_INVALID_OPERATION, node->token.lexeme, node->token.line);
+            return -1;
         }
 
         case AST_CONDITION:
+            if (node->left) return get_expression_type(node->left, table);
+            return -1;
         case AST_COMPARISON: {
-            if (node->left) get_expression_type(node->left, table);
-            if (node->right) get_expression_type(node->right, table);
-            // comparison returns an int (0, 1) true or false
+            int left_type = get_expression_type(node->left, table);
+            int right_type = get_expression_type(node->right, table);
+            if (left_type == -1 || right_type == -1) return -1; // error
+
+            if (left_type == TOKEN_CHAR || right_type == TOKEN_CHAR) {
+                semantic_error(SEM_ERROR_INVALID_CONDITION, node->token.lexeme, node->token.line);
+                return -1;
+            }
             return TOKEN_INT;
         }
 
@@ -475,6 +518,12 @@ void semantic_error(SemanticErrorType error, const char* name, int line) {
         case SEM_ERROR_SEMANTIC_ERROR:
             printf("Semantic error involving '%s'\n", name);
             break;
+        case SEM_ERROR_INVALID_CONDITION:
+            printf("Invalid condition involving '%s'\n", name);
+            break;
+        case SEM_ERROR_INVALID_PARAMETERS:
+            printf("Invalid parameter(s) involving '%s'\n", name);
+            break;
         default:
             printf("Unknown semantic error with '%s'\n", name);
     }
@@ -482,27 +531,59 @@ void semantic_error(SemanticErrorType error, const char* name, int line) {
 
 
 int main() {
-    const char* input = "int x;\n"
-                        "x = 42;\n"
-                        "if (x > 0) {\n"
-                        "    int y;\n"
-                        "    y = x + 10;\n"
-                        "    print y;\n"
-                        "}\n"
-                        "z = 10;\n"
-                        "char test;\n"
-                        "test = 123;\n"
-                        "x = test + 1;\n"
-                        "char foo;\n"
-                        "if (foo > 2) {\n"
-                        "   int z;\n"
-                        "   z = 10;\n"
-                        "}\n";
+    const char* valid_input = "int x;\n"
+                          "char test;\n"
+                          "test = \"a\";\n"  // Using a valid char assignment
+                          "x = test + 1;\n"
+                          "int expr;\n"
+                          "expr = 123;\n"
+                          "int foo;\n"
+                          "foo = 4;\n"
+                          "if (foo > 2) {\n"
+                          "   int z;\n"
+                          "   z = 10;\n"
+                          "}\n";
+
+    const char* invalid_input = "int x;\n"
+                            "int x;\n"  // Redeclaration error
+                            "y = 5;\n"  // Undeclared variable usage
+                            "if (x > 0) {\n"
+                            "    int y;\n"
+                            "    y = x + 10;\n"
+                            "    print y;\n"
+                            "}\n"
+                            "z = 10;\n"  // Undeclared variable usage
+                            "char test;\n"
+                            "test = \"123\";\n"  // Type mismatch
+                            "x = test + 1;\n"
+                            "char foo;\n"
+                            "if (foo > 2) {\n"
+                            "   int z;\n"
+                            "   z = 10;\n"
+                            "}\n"
+                            "char x;\n"
+                            "int expr;\n"
+                            "expr = 123;\n"
+                            "x = expr;\n"  // Type mismatch
+                            "char y;\n"
+                            "int num;\n"
+                            "y = \"hello\";\n"
+                            "num = 40;\n"
+                            "num = y < num;\n"  // Invalid operation
+                            "if (1) {\n"
+                            "    int scope_var;\n"
+                            "    scope_var = 10;\n"
+                            "}\n"
+                            "print scope_var;\n"  // Scope error
+                            "if (\"hello\") {\n"
+                            "    print \"bye\";\n"
+                            "}\n"  // Invalid condition
+                            "factorial(5 < 3);\n";  // Invalid function parameter
     
-    printf("Analyzing input:\n%s\n\n", input);
+    printf("Analyzing input:\n%s\n\n", valid_input);
     
     // Lexical analysis and parsing
-    parser_init(input);
+    parser_init(valid_input);
     ASTNode* ast = parse();
     
     printf("AST created. Performing semantic analysis...\n\n");

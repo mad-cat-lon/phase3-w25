@@ -45,6 +45,7 @@ void print_token(Token token) {
 
     printf("Token: ");
     switch (token.type) {
+        case TOKEN_STRING_LITERAL: printf("STRING"); break;
         case TOKEN_NUMBER:      printf("NUMBER"); break;
         case TOKEN_OPERATOR:    printf("OPERATOR"); break;
         case TOKEN_COMPARISON:  printf("COMPARISON"); break;
@@ -69,6 +70,7 @@ void print_token(Token token) {
         case TOKEN_FLOAT:       printf("FLOAT"); break;
         case TOKEN_CHAR:        printf("CHAR"); break;
         case TOKEN_PRINT:       printf("PRINT"); break;
+        case TOKEN_FACTORIAL:   printf("FACTORIAL"); break;
         case TOKEN_EOF:         printf("EOF"); break;
         default:                printf("UNKNOWN");
     }

@@ -11,6 +11,7 @@ typedef enum {
     AST_ASSIGN,         // Assignment (x = 5)
     AST_PRINT,          // Print statement
     AST_NUMBER,         // Number literal
+    AST_STRING,         // String literal
     AST_IDENTIFIER,     // Variable name
     // TODO: Add more node types as needed
     AST_IF,
@@ -37,6 +38,7 @@ typedef enum {
     PARSE_ERROR_MISSING_RBRACE,
     PARSE_ERROR_MISSING_LBRACK,
     PARSE_ERROR_MISSING_RBRACK,
+    PARSE_ERROR_MISSING_QUOTE,
     PARSE_ERROR_INVALID_STATEMENT,
     PARSE_ERROR_MISSING_UNTIL,
     PARSE_ERROR_INVALID_COMPARISON,
